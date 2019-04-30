@@ -843,6 +843,7 @@ class Mage_Sales_Model_Order_Invoice extends Mage_Sales_Model_Abstract
                 'payment_html' => $paymentBlockHtml
             )
         );
+        $this->_queueMail($mailer, true);
         $mailer->send();
 
         if ($notifyCustomer) {
@@ -918,6 +919,7 @@ class Mage_Sales_Model_Order_Invoice extends Mage_Sales_Model_Abstract
                 'billing'      => $order->getBillingAddress()
             )
         );
+        $this->_queueMail($mailer);
         $mailer->send();
 
         return $this;

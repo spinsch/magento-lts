@@ -81,4 +81,23 @@ abstract class Mage_Sales_Model_Abstract extends Mage_Core_Model_Abstract
             true
         );
     }
+
+    /**
+     * Add email to queue
+     *
+     * @param  Mage_Core_Model_Email_Template $mailer
+     * @param  boolean $isNew
+     * @return void
+     */
+    protected function _queueMail(Mage_Core_Model_Email_Template $mailer, $isNew = false)
+    {
+        $eventType = self::HISTORY_ENTITY_NAME.($isNew) ? '_new' : '_update';
+
+        /** @var $emailQueue Mage_Core_Model_Email_Queue */
+        $emailQueue = Mage::getModel('core/email_queue');
+        $emailQueue->setEntityId($this->getId())
+            ->setEntityType(self::HISTORY_ENTITY_NAME)
+            ->setEventType($eventType);
+        $mailer->setQueue($emailQueue);
+    }
 }
