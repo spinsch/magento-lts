@@ -339,25 +339,39 @@ abstract class Mage_Sales_Model_Resource_Order_Abstract extends Mage_Sales_Model
 
         if (is_array($attribute) && !empty($attribute)) {
             $this->beginTransaction();
-            try {
-                $this->_beforeSaveAttribute($object, $attribute);
-                $data = new Varien_Object();
-                foreach ($attribute as $code) {
-                    $data->setData($code, $object->getData($code));
-                }
 
-                $updateArray = $this->_prepareDataForTable($data, $this->getMainTable());
-                $this->_postSaveFieldsUpdate($object, $updateArray);
-                if (!$object->getForceUpdateGridRecords() &&
+            $retry = 0;
+            $maxRetries = 3;
+
+            while ($retry < $maxRetries)
+            {
+                try {
+                    $this->_beforeSaveAttribute($object, $attribute);
+                    $data = new Varien_Object();
+                    foreach ($attribute as $code) {
+                        $data->setData($code, $object->getData($code));
+                    }
+
+                    $updateArray = $this->_prepareDataForTable($data, $this->getMainTable());
+                    $this->_postSaveFieldsUpdate($object, $updateArray);
+                    if (!$object->getForceUpdateGridRecords() &&
                     count(array_intersect($this->getGridColumns(), $attribute)) > 0
-                ) {
-                    $this->updateGridRecords($object->getId());
+                    ) {
+                        $this->updateGridRecords($object->getId());
+                    }
+                    $this->_afterSaveAttribute($object, $attribute);
+                    $this->commit();
+                    break;
+                } catch (Exception $e) {
+                    $this->rollBack();
+                    $retry++;
+
+                    if ($retry === $maxRetries) {
+                        throw $e;
+                    } else {
+                        Mage::Log(__METHOD__, null , 'transaction-restart.log');
+                    }
                 }
-                $this->_afterSaveAttribute($object, $attribute);
-                $this->commit();
-            } catch (Exception $e) {
-                $this->rollBack();
-                throw $e;
             }
         }
 
@@ -454,4 +468,3 @@ abstract class Mage_Sales_Model_Resource_Order_Abstract extends Mage_Sales_Model
         return $this;
     }
 }
-
