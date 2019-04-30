@@ -83,7 +83,6 @@ class Mage_Sales_Model_Order_Status_History extends Mage_Sales_Model_Abstract
     public function setOrder(Mage_Sales_Model_Order $order)
     {
         $this->_order = $order;
-        $this->setStoreId($order->getStoreId());
         return $this;
     }
 
