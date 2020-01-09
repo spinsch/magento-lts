@@ -48,7 +48,7 @@ class Mage_Adminhtml_Catalog_Product_ReviewController extends Mage_Adminhtml_Con
      */
     public function preDispatch()
     {
-        $this->_setForcedFormKeyActions(array('delete', 'massDelete'));
+        $this->_setForcedFormKeyActions(array('massDelete'));
         return parent::preDispatch();
     }
 
